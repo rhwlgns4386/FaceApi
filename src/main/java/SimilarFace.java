@@ -131,9 +131,7 @@ public class SimilarFace {
             jo.put("faceId", faceId);
             jo.put("maxNumOfCandidatesReturned", 10);
             jo.put("mode", "matchPerson");
-            for (String id : faceIds) {
-                jo.append("faceIds", id);
-            }
+            jo.put("faceIds", faceIds);
             System.out.println(jo);
             StringEntity reqEntity = new StringEntity(jo.toString());
             request.setEntity(reqEntity);
