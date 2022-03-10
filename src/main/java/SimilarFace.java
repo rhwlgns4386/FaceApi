@@ -5,7 +5,6 @@
 // api 사용 참고
 // https://docs.microsoft.com/ko-kr/azure/cognitive-services/face/quickstarts/client-libraries?tabs=visual-studio&pivots=programming-language-rest-api
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.LinkedList;
 

@@ -5,7 +5,6 @@
 // api 사용 참고
 // https://docs.microsoft.com/ko-kr/azure/cognitive-services/face/quickstarts/client-libraries?tabs=visual-studio&pivots=programming-language-rest-api
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -34,13 +33,6 @@ public class Detect {
 
 // </environment>
 
-    private static StringEntity imageEntity(String imageWithFaces) throws UnsupportedEncodingException {
-        String sb = "{\"url\"" +
-                ":" +
-                "\"" + imageWithFaces + "\"}";
-        return new StringEntity(sb);
-    }
-
     // <main>
     public static void main(String[] args) {
         HttpClient httpclient = HttpClientBuilder.create().build();
@@ -63,7 +55,9 @@ public class Detect {
             request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
 
             // Request body.
-            StringEntity reqEntity = imageEntity(imageWithFaces);
+            JSONObject jo = new JSONObject();
+            jo.put("url", imageWithFaces);
+            StringEntity reqEntity = new StringEntity(jo.toString());
             request.setEntity(reqEntity);
 
             // Execute the REST API call and get the response entity.
