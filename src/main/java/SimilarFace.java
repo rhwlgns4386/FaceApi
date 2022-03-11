@@ -31,16 +31,19 @@ public class SimilarFace {
     private static final String endpoint = Key.getEndpoint();
 
     private static final String imageWithFaces =
-            "https://csdx.blob.core.windows.net/resources/Face/Images/findsimilar.jpg";
+            "https://www.city.kr/files/attach/images/164/021/406/027/a3a171092f21ff2fc5f3e473ddc99e50.jpeg";
     private static final String[] imagesWithFace = {
+            "https://img.hankyung.com/photo/202112/BF.28305426.1.jpg",
+            "http://file.mk.co.kr/meet/neds/2021/09/image_readtop_2021_915112_16325771814795046.jpg",
+            "https://blog.kakaocdn.net/dn/U9jp4/btriYfr5pCN/xtXF2GMKqgHjvSN6h2L3ck/img.jpg",
             "https://csdx.blob.core.windows.net/resources/Face/Images/Family1-Dad1.jpg",
             "https://csdx.blob.core.windows.net/resources/Face/Images/Family1-Daughter1.jpg",
-    "https://csdx.blob.core.windows.net/resources/Face/Images/Family1-Mom1.jpg",
-    "https://csdx.blob.core.windows.net/resources/Face/Images/Family1-Son1.jpg",
-    "https://csdx.blob.core.windows.net/resources/Face/Images/Family2-Lady1.jpg",
-    "https://csdx.blob.core.windows.net/resources/Face/Images/Family2-Man1.jpg",
-    "https://csdx.blob.core.windows.net/resources/Face/Images/Family3-Lady1.jpg",
-    "https://csdx.blob.core.windows.net/resources/Face/Images/Family3-Man1.jpg"
+            "https://csdx.blob.core.windows.net/resources/Face/Images/Family1-Mom1.jpg",
+            "https://csdx.blob.core.windows.net/resources/Face/Images/Family1-Son1.jpg",
+            "https://csdx.blob.core.windows.net/resources/Face/Images/Family2-Lady1.jpg",
+            "https://csdx.blob.core.windows.net/resources/Face/Images/Family2-Man1.jpg",
+            "https://csdx.blob.core.windows.net/resources/Face/Images/Family3-Lady1.jpg",
+            "https://csdx.blob.core.windows.net/resources/Face/Images/Family3-Man1.jpg"
     };
 
 // </environment>
@@ -82,8 +85,7 @@ public class SimilarFace {
                     JSONArray jsonArray = new JSONArray(jsonString);
                     JSONObject jsonObject = new JSONObject(jsonArray.get(0).toString());
                     imageId = jsonObject.getString("faceId");
-                }
-                else if (jsonString.charAt(0) == '{') {
+                } else if (jsonString.charAt(0) == '{') {
                     JSONObject jsonObject = new JSONObject(jsonString);
                     imageId = jsonObject.getString("faceId");
                 } else {
@@ -109,8 +111,7 @@ public class SimilarFace {
 
         String faceId = getImageId(imageWithFaces);
 
-        try
-        {
+        try {
             URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/findsimilars");
 
             // Request parameters. All of them are optional.
@@ -142,8 +143,7 @@ public class SimilarFace {
 // </main>
 
 // <print>
-            if (entity != null)
-            {
+            if (entity != null) {
                 // Format and display the JSON response.
                 System.out.println("REST Response:\n");
 
@@ -151,17 +151,14 @@ public class SimilarFace {
                 if (jsonString.charAt(0) == '[') {
                     JSONArray jsonArray = new JSONArray(jsonString);
                     System.out.println(jsonArray.toString(2));
-                }
-                else if (jsonString.charAt(0) == '{') {
+                } else if (jsonString.charAt(0) == '{') {
                     JSONObject jsonObject = new JSONObject(jsonString);
                     System.out.println(jsonObject.toString(2));
                 } else {
                     System.out.println(jsonString);
                 }
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             // Display error message.
             System.out.println(e.getMessage());
         }
