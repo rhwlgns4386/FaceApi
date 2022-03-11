@@ -4,6 +4,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URI;
@@ -28,7 +30,7 @@ public class LargePersonGroup {
         this.name = name;
     }
 
-    public LargePersonGroup userDate(String userData) {
+    public LargePersonGroup userData(String userData) {
         this.userData = userData;
         return this;
     }
@@ -59,7 +61,6 @@ public class LargePersonGroup {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", this.name);
             jsonObject.put("userData", this.userData);
-            jsonObject.put("recognitionModel", this.recognitionModel);
 
             // Execute the REST API call and get the response entity
             HttpResponse response = httpClient.execute(request);
@@ -79,5 +80,47 @@ public class LargePersonGroup {
         return this;
     }
 
+    public String addFace(String personId, String imageUrl) {
+        HttpClient httpClient = HttpClientBuilder.create().build();
+
+        try {
+            URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/persongroups/" +  this.largePersonGroupId + "/persons/" + personId + "/persistedFaces");
+
+            URI uri = builder.build();
+            HttpPut request = new HttpPut(uri);
+
+            // Request headers
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+            // Request body
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("url", imageUrl);
+
+            // Execute the REST API call and get the response entity
+            HttpResponse response = httpClient.execute(request);
+            HttpEntity entity = response.getEntity();
+
+            if (entity != null) {
+                String jsonString;
+                jsonString = EntityUtils.toString(entity).trim();
+                if (jsonString.charAt(0) == '[') {
+                    JSONArray jsonArray = new JSONArray(jsonString);
+                    JSONObject jo = new JSONObject(jsonArray.get(0));
+                    return jo.getString("persistedFaceId");
+                } else if (jsonString.charAt(0) == '{') {
+                    JSONObject jo = new JSONObject(jsonString);
+                    return jo.getString("persistedFaceId");
+                } else {
+                    return jsonString;
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return "error";
+    }
 
 }
