@@ -1,21 +1,12 @@
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.net.URI;
 
 public class LargePersonGroup {
 
-    private final String endpoint = Key.getEndpoint();
-    private final String subscriptionKey = Key.getKey();
+
+    private static final String resource="face/v1.0/largepersongroups/";
 
     private final String largePersonGroupId;
     private final String name;
@@ -23,6 +14,8 @@ public class LargePersonGroup {
     // optional
     private String userData = "";
     private String recognitionModel = "";
+
+    private final HttpRequestFacade httpRequestFacade;
 
     public static LargePersonGroup builder(String largePersonGroupId, String name) {
         return new LargePersonGroup(largePersonGroupId, name);
@@ -32,6 +25,7 @@ public class LargePersonGroup {
         super();
         this.largePersonGroupId = largePersonGroupId;
         this.name = name;
+        httpRequestFacade = new HttpRequestFacade(resource);
     }
 
     public LargePersonGroup userData(String userData) {
@@ -49,28 +43,16 @@ public class LargePersonGroup {
     }
 
     public LargePersonGroup build() {
-        HttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
-            URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/largepersongroups/" + this.largePersonGroupId);
-
-            URI uri = builder.build();
-            HttpPut request = new HttpPut(uri);
-
-            // Request headers
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-
             // Request body
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", this.name);
             jsonObject.put("userData", this.userData);
             jsonObject.put("recognitionModel", this.recognitionModel);
-            StringEntity reqEntity = new StringEntity(jsonObject.toString());
-            request.setEntity(reqEntity);
 
             // Execute the REST API call and get the response entity
-            HttpResponse response = httpClient.execute(request);
+            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.PUT,this.largePersonGroupId,jsonObject);
             HttpEntity entity = response.getEntity();
 
             // 200
