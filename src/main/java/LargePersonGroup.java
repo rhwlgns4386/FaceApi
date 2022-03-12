@@ -1,8 +1,10 @@
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -17,6 +19,8 @@ public class LargePersonGroup {
 
     private final String largePersonGroupId;
     private final String name;
+
+    // optional
     private String userData = "";
     private String recognitionModel = "";
 
@@ -61,6 +65,9 @@ public class LargePersonGroup {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", this.name);
             jsonObject.put("userData", this.userData);
+            jsonObject.put("recognitionModel", this.recognitionModel);
+            StringEntity reqEntity = new StringEntity(jsonObject.toString());
+            request.setEntity(reqEntity);
 
             // Execute the REST API call and get the response entity
             HttpResponse response = httpClient.execute(request);
@@ -69,58 +76,15 @@ public class LargePersonGroup {
             // 200
             if (response.getStatusLine().getStatusCode() == 200) {
                 return this;
-            } else {    // 40x
-                throw new APIException(entity); // 아래 catch문에서 잡힐 것임
+            } else {    // api error
+                throw new IllegalStateException(EntityUtils.toString(entity)); // 아래 catch문에서 잡힐 것임
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 
         return this;
-    }
-
-    public String addFace(String personId, String imageUrl) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
-
-        try {
-            URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/persongroups/" +  this.largePersonGroupId + "/persons/" + personId + "/persistedFaces");
-
-            URI uri = builder.build();
-            HttpPut request = new HttpPut(uri);
-
-            // Request headers
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-            // Request body
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("url", imageUrl);
-
-            // Execute the REST API call and get the response entity
-            HttpResponse response = httpClient.execute(request);
-            HttpEntity entity = response.getEntity();
-
-            if (entity != null) {
-                String jsonString;
-                jsonString = EntityUtils.toString(entity).trim();
-                if (jsonString.charAt(0) == '[') {
-                    JSONArray jsonArray = new JSONArray(jsonString);
-                    JSONObject jo = new JSONObject(jsonArray.get(0));
-                    return jo.getString("persistedFaceId");
-                } else if (jsonString.charAt(0) == '{') {
-                    JSONObject jo = new JSONObject(jsonString);
-                    return jo.getString("persistedFaceId");
-                } else {
-                    return jsonString;
-                }
-            }
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-        return "error";
     }
 
 }

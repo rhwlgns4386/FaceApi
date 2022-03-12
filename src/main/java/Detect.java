@@ -29,7 +29,7 @@ public class Detect {
     private static final String endpoint = Key.getEndpoint();
 
     private static final String imageWithFaces =
-            "https://upload.wikimedia.org/wikipedia/commons/c/c3/RH_Louise_Lillian_Gish.jpg";
+            "https://thumb.mt.co.kr/06/2021/08/2021081919350869043_1.jpg/dims/optimize/";
 
 // </environment>
 
@@ -44,7 +44,7 @@ public class Detect {
             // Request parameters. All of them are optional.
             builder.setParameter("detectionModel", "detection_01");
             builder.setParameter("returnFaceId", "true");
-            builder.setParameter("returnFaceLandmarks", "true");
+            builder.setParameter("returnFaceLandmarks", "false");
 
             // Prepare the URI for the REST API call.
             URI uri = builder.build();
