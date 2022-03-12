@@ -14,17 +14,19 @@ import java.net.URI;
 
 public class Person {
 
-    private final String endpoint = Key.getEndpoint();
-    private final String subscriptionKey = Key.getKey();
+    private static final String resource="face/v1.0/largepersongroups/";
 
     private String name;
     private String personGroupId;
     private String userData;
     private String personId;
 
+    private final HttpRequestFacade httpRequestFacade;
+
     protected Person(String personGroupId, String name) {
         this.personGroupId = personGroupId;
         this.name = name;
+        httpRequestFacade=new HttpRequestFacade(resource);
     }
 
     public static Person builder(String personGroupId, String name) {
@@ -41,28 +43,15 @@ public class Person {
     }
 
     public Person build() {
-        HttpClient httpClient = HttpClientBuilder.create().build();
+        String queryParam=personGroupId +"/persons";
 
         try {
-            URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/largepersongroups/" + personGroupId +"/persons");
-
-            URI uri = builder.build();
-            HttpPost request = new HttpPost(uri);
-
-            // Request headers
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-            // Request body
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", this.name);
             jsonObject.put("userData", this.userData);
 
-            StringEntity reqEntity = new StringEntity(jsonObject.toString());
-            request.setEntity(reqEntity);
-
             // Execute the REST API call and get the response entity
-            HttpResponse response = httpClient.execute(request);
+            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.POST,queryParam,jsonObject);
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {
@@ -92,28 +81,17 @@ public class Person {
     }
 
     public String addFace(String largePersonGroupId, String imageUrl) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
         String persistedFaceId = "";
+        String queryParam=largePersonGroupId +"/persons/" + this.personId + "/persistedfaces";
 
         try {
-            URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/largepersongroups/" +  largePersonGroupId + "/persons/" + this.personId + "/persistedfaces");
-
-            URI uri = builder.build();
-            HttpPost request = new HttpPost(uri);
-
-            // Request headers
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
 
             // Request body
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("url", imageUrl);
 
-            StringEntity reqEntity = new StringEntity(jsonObject.toString());
-            request.setEntity(reqEntity);
-
             // Execute the REST API call and get the response entity
-            HttpResponse response = httpClient.execute(request);
+            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.POST,queryParam,jsonObject);
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {
