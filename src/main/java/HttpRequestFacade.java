@@ -27,8 +27,8 @@ public class HttpRequestFacade {
         httpClient=HttpClientBuilder.create().build();
     }
 
-    public HttpResponse getHttpResponse(String queryParam) throws URISyntaxException, IOException {
-        URIBuilder builder = new URIBuilder(resource+queryParam);
+    public HttpResponse getHttpResponse(URIBuilder uriBuilder) throws URISyntaxException, IOException {
+        URIBuilder builder = uriBuilder;
 
 
         URI uri = builder.build();
@@ -39,8 +39,8 @@ public class HttpRequestFacade {
         return response;
     }
 
-    public HttpResponse getHttpResponse(HttpRequestMethod httpRequestType, String queryParam, JSONObject jsonObject) throws URISyntaxException, IOException {
-        URIBuilder builder = new URIBuilder(endpoint+resource + queryParam);
+    public HttpResponse getHttpResponse(HttpRequestMethod httpRequestType, URIBuilder uriBuilder, JSONObject jsonObject) throws URISyntaxException, IOException {
+        URIBuilder builder = uriBuilder;
 
         URI uri = builder.build();
         HttpEntityEnclosingRequestBase request;
@@ -56,12 +56,17 @@ public class HttpRequestFacade {
         request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
 
         // Request body.
-
-        StringEntity reqEntity = new StringEntity(jsonObject.toString());
-        request.setEntity(reqEntity);
+        if(jsonObject!=null){
+            StringEntity reqEntity = new StringEntity(jsonObject.toString());
+            request.setEntity(reqEntity);
+        }
 
         // Execute the REST API call and get the response entity.
         HttpResponse response = httpClient.execute(request);
         return response;
+    }
+
+    public URIBuilder getUriBuilder(String path) throws URISyntaxException {
+        return new URIBuilder(endpoint + resource + path);
     }
 }

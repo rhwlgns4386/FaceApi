@@ -43,7 +43,7 @@ public class Person {
     }
 
     public Person build() {
-        String queryParam=personGroupId +"/persons";
+        String path=personGroupId +"/persons";
 
         try {
             JSONObject jsonObject = new JSONObject();
@@ -51,7 +51,7 @@ public class Person {
             jsonObject.put("userData", this.userData);
 
             // Execute the REST API call and get the response entity
-            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.POST,queryParam,jsonObject);
+            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.POST,httpRequestFacade.getUriBuilder(path),jsonObject);
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {
@@ -82,7 +82,7 @@ public class Person {
 
     public String addFace(String largePersonGroupId, String imageUrl) {
         String persistedFaceId = "";
-        String queryParam=largePersonGroupId +"/persons/" + this.personId + "/persistedfaces";
+        String path=largePersonGroupId +"/persons/" + this.personId + "/persistedfaces";
 
         try {
 
@@ -91,7 +91,7 @@ public class Person {
             jsonObject.put("url", imageUrl);
 
             // Execute the REST API call and get the response entity
-            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.POST,queryParam,jsonObject);
+            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.POST,httpRequestFacade.getUriBuilder(path),jsonObject);
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {

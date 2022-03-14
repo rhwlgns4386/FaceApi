@@ -3,8 +3,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
-public class LargePersonGroup {
+import java.io.IOException;
+import java.net.URISyntaxException;
 
+public class LargePersonGroup {
 
     private static final String resource="face/v1.0/largepersongroups/";
 
@@ -52,7 +54,7 @@ public class LargePersonGroup {
             jsonObject.put("recognitionModel", this.recognitionModel);
 
             // Execute the REST API call and get the response entity
-            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.PUT,this.largePersonGroupId,jsonObject);
+            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.PUT,httpRequestFacade.getUriBuilder(this.largePersonGroupId),jsonObject);
             HttpEntity entity = response.getEntity();
 
             // 200
@@ -67,6 +69,23 @@ public class LargePersonGroup {
         }
 
         return this;
+    }
+
+    public void train(String largePersonGroupId){
+        String path=largePersonGroupId+"/train";
+        try {
+            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.POST,httpRequestFacade.getUriBuilder(path),null);
+            HttpEntity entity = response.getEntity();
+            if(response.getStatusLine().getStatusCode()==202){
+                return;
+            }
+            System.out.println(EntityUtils.toString(entity));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

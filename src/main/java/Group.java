@@ -27,8 +27,8 @@ import org.json.JSONObject;
  *   java -cp .;lib\* Detect
  */
 public class Group {
-    private static final String subscriptionKey = Key.getKey();
-    private static final String endpoint = Key.getEndpoint();
+
+    private static Face face = new Face();
 
     private static final String[] imagesWithFace = {
             "https://img.hankyung.com/photo/202112/BF.28305426.1.jpg",
@@ -52,59 +52,28 @@ public class Group {
 // </environment>
 
     private static String getImageId(String imageWithFaces) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
+
         String imageId = "";
 
-        try {
-            URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/detect");
+        String jsonString = face.detect(imageWithFaces);
 
-            // Request parameters. All of them are optional.
-            builder.setParameter("detectionModel", "detection_01");
-            builder.setParameter("returnFaceId", "true");
-            builder.setParameter("returnFaceLandmarks", "false");
-
-            // Prepare the URI for the REST API call.
-            URI uri = builder.build();
-            HttpPost request = new HttpPost(uri);
-
-            // Request headers.
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-            // Request body.
-            JSONObject jo = new JSONObject();
-            jo.put("url", imageWithFaces);
-            StringEntity reqEntity = new StringEntity(jo.toString());
-            request.setEntity(reqEntity);
-
-            // Execute the REST API call and get the response entity.
-            HttpResponse response = httpClient.execute(request);
-            HttpEntity entity = response.getEntity();
-
-            if (entity != null) {
-
-                String jsonString = EntityUtils.toString(entity).trim();
-                if (jsonString.charAt(0) == '[') {
-                    JSONArray jsonArray = new JSONArray(jsonString);
-                    JSONObject jsonObject = new JSONObject(jsonArray.get(0).toString());
-                    imageId = jsonObject.getString("faceId");
-                } else if (jsonString.charAt(0) == '{') {
-                    JSONObject jsonObject = new JSONObject(jsonString);
-                    imageId = jsonObject.getString("faceId");
-                } else {
-                    System.out.println(jsonString);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        if (jsonString.charAt(0) == '[') {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            JSONObject jsonObject = new JSONObject(jsonArray.get(0).toString());
+            imageId = jsonObject.getString("faceId");
+        } else if (jsonString.charAt(0) == '{') {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            imageId = jsonObject.getString("faceId");
+        } else {
+            System.out.println(jsonString);
         }
+
 
         return imageId;
     }
 
     // <main>
     public static void main(String[] args) {
-        HttpClient httpclient = HttpClientBuilder.create().build();
 
         LinkedList<String> faceIds = new LinkedList<>();
         for (String image : imagesWithFace) {
@@ -112,50 +81,26 @@ public class Group {
             faceIds.add(faceId);
         }
 
-        try {
-            URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/group");
+        // Request body.
+        JSONObject jo = new JSONObject();
+        jo.put("faceIds", faceIds);
 
-            // Prepare the URI for the REST API call.
-            URI uri = builder.build();
-            HttpPost request = new HttpPost(uri);
+        // Format and display the JSON response.
+        System.out.println("REST Response:\n");
 
-            // Request headers.
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-            // Request body.
-            JSONObject jo = new JSONObject();
-            jo.put("faceIds", faceIds);
-            System.out.println(jo);
-            StringEntity reqEntity = new StringEntity(jo.toString());
-            request.setEntity(reqEntity);
-
-            // Execute the REST API call and get the response entity.
-            HttpResponse response = httpclient.execute(request);
-            HttpEntity entity = response.getEntity();
-// </main>
-
-// <print>
-            if (entity != null) {
-                // Format and display the JSON response.
-                System.out.println("REST Response:\n");
-
-                String jsonString = EntityUtils.toString(entity).trim();
-                if (jsonString.charAt(0) == '[') {
-                    JSONArray jsonArray = new JSONArray(jsonString);
-                    System.out.println(jsonArray.toString(2));
-                } else if (jsonString.charAt(0) == '{') {
-                    JSONObject jsonObject = new JSONObject(jsonString);
-                    System.out.println(jsonObject.toString(2));
-                } else {
-                    System.out.println(jsonString);
-                }
-            }
-        } catch (Exception e) {
-            // Display error message.
-            System.out.println(e.getMessage());
+        String jsonString = face.group(faceIds.toArray(new String[faceIds.size()]));
+        if (jsonString.charAt(0) == '[') {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            System.out.println(jsonArray.toString(2));
+        } else if (jsonString.charAt(0) == '{') {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            System.out.println(jsonObject.toString(2));
+        } else {
+            System.out.println(jsonString);
         }
-
     }
+
+
 }
+
 // </print>
