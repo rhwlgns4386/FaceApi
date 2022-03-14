@@ -27,19 +27,25 @@ public class HttpRequestFacade {
         httpClient=HttpClientBuilder.create().build();
     }
 
-    public HttpResponse getHttpResponse(URIBuilder uriBuilder) throws URISyntaxException, IOException {
-        URIBuilder builder = uriBuilder;
+    public HttpResponse getHttpResponse(URIBuilder uriBuilder)  {
+        try {
+            URIBuilder builder = uriBuilder;
 
 
-        URI uri = builder.build();
-        HttpGet request = new HttpGet(uri);
-        request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+            URI uri = builder.build();
+            HttpGet request = new HttpGet(uri);
+            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
 
-        HttpResponse response = httpClient.execute(request);
-        return response;
+            HttpResponse response = httpClient.execute(request);
+            return response;
+        }catch (URISyntaxException |IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+
     }
 
-    public HttpResponse getHttpResponse(HttpRequestMethod httpRequestType, URIBuilder uriBuilder, JSONObject jsonObject) throws URISyntaxException, IOException {
+    public HttpResponse getHttpResponse(HttpRequestMethod httpRequestType, URIBuilder uriBuilder, JSONObject jsonObject) {
+        try {
         URIBuilder builder = uriBuilder;
 
         URI uri = builder.build();
@@ -62,8 +68,11 @@ public class HttpRequestFacade {
         }
 
         // Execute the REST API call and get the response entity.
-        HttpResponse response = httpClient.execute(request);
+        HttpResponse response =  httpClient.execute(request);
         return response;
+        } catch (URISyntaxException |IOException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     public URIBuilder getUriBuilder(String path) throws URISyntaxException {
