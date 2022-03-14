@@ -43,7 +43,7 @@ public class LargeFaceList {
 
         try {
 
-            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.PUT,this.id,jo);
+            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.PUT,httpRequestFacade.getUriBuilder(this.id),jo);
             HttpEntity entity = response.getEntity();
 
             // 200
@@ -62,13 +62,13 @@ public class LargeFaceList {
     public String add(String imageUrlList) {
         String persistedFaceId = "";
 
-        String queryParam=this.id + "/persistedfaces";
+        String path=this.id + "/persistedfaces";
 
         try {
             JSONObject jo = new JSONObject();
             jo.put("url", imageUrlList);
 
-            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.POST, queryParam, jo);
+            HttpResponse response = httpRequestFacade.getHttpResponse(HttpRequestFacade.HttpRequestMethod.POST, httpRequestFacade.getUriBuilder(path), jo);
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {

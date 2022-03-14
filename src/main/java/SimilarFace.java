@@ -27,8 +27,9 @@ import org.json.JSONObject;
  *   java -cp .;lib\* Detect
  */
 public class SimilarFace {
-    private static final String subscriptionKey = Key.getKey();
-    private static final String endpoint = Key.getEndpoint();
+    private static final String resource = "/face/v1.0/";
+    private HttpRequestFacade httpRequestFacade;
+    private static Face face = new Face();
 
     private static final String imageWithFaces =
             "https://www.city.kr/files/attach/images/164/021/406/027/a3a171092f21ff2fc5f3e473ddc99e50.jpeg";
@@ -46,55 +47,29 @@ public class SimilarFace {
             "https://csdx.blob.core.windows.net/resources/Face/Images/Family3-Man1.jpg"
     };
 
+    public SimilarFace() {
+        this.httpRequestFacade = new HttpRequestFacade(this.resource);
+    }
+
 // </environment>
 
     private static String getImageId(String imageWithFaces) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
+
         String imageId = "";
 
-        try {
-            URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/detect");
+        String jsonString = face.detect(imageWithFaces);
 
-            // Request parameters. All of them are optional.
-            builder.setParameter("detectionModel", "detection_01");
-            builder.setParameter("returnFaceId", "true");
-            builder.setParameter("returnFaceLandmarks", "false");
-
-            // Prepare the URI for the REST API call.
-            URI uri = builder.build();
-            HttpPost request = new HttpPost(uri);
-
-            // Request headers.
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-            // Request body.
-            JSONObject jo = new JSONObject();
-            jo.put("url", imageWithFaces);
-            StringEntity reqEntity = new StringEntity(jo.toString());
-            request.setEntity(reqEntity);
-
-            // Execute the REST API call and get the response entity.
-            HttpResponse response = httpClient.execute(request);
-            HttpEntity entity = response.getEntity();
-
-            if (entity != null) {
-
-                String jsonString = EntityUtils.toString(entity).trim();
-                if (jsonString.charAt(0) == '[') {
-                    JSONArray jsonArray = new JSONArray(jsonString);
-                    JSONObject jsonObject = new JSONObject(jsonArray.get(0).toString());
-                    imageId = jsonObject.getString("faceId");
-                } else if (jsonString.charAt(0) == '{') {
-                    JSONObject jsonObject = new JSONObject(jsonString);
-                    imageId = jsonObject.getString("faceId");
-                } else {
-                    System.out.println(jsonString);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        if (jsonString.charAt(0) == '[') {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            JSONObject jsonObject = new JSONObject(jsonArray.get(0).toString());
+            imageId = jsonObject.getString("faceId");
+        } else if (jsonString.charAt(0) == '{') {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            imageId = jsonObject.getString("faceId");
+        } else {
+            System.out.println(jsonString);
         }
+
 
         return imageId;
     }
@@ -111,57 +86,21 @@ public class SimilarFace {
 
         String faceId = getImageId(imageWithFaces);
 
-        try {
-            URIBuilder builder = new URIBuilder(endpoint + "/face/v1.0/findsimilars");
 
-            // Request parameters. All of them are optional.
-            builder.setParameter("detectionModel", "detection_01");
-            builder.setParameter("returnFaceId", "true");
-            builder.setParameter("returnFaceLandmarks", "false");
+        // Format and display the JSON response.
+        System.out.println("REST Response:\n");
 
-            // Prepare the URI for the REST API call.
-            URI uri = builder.build();
-            HttpPost request = new HttpPost(uri);
-
-            // Request headers.
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-            // Request body.
-            JSONObject jo = new JSONObject();
-            jo.put("faceId", faceId);
-            jo.put("maxNumOfCandidatesReturned", 10);
-            jo.put("mode", "matchPerson");
-            jo.put("faceIds", faceIds);
-            System.out.println(jo);
-            StringEntity reqEntity = new StringEntity(jo.toString());
-            request.setEntity(reqEntity);
-
-            // Execute the REST API call and get the response entity.
-            HttpResponse response = httpclient.execute(request);
-            HttpEntity entity = response.getEntity();
-// </main>
-
-// <print>
-            if (entity != null) {
-                // Format and display the JSON response.
-                System.out.println("REST Response:\n");
-
-                String jsonString = EntityUtils.toString(entity).trim();
-                if (jsonString.charAt(0) == '[') {
-                    JSONArray jsonArray = new JSONArray(jsonString);
-                    System.out.println(jsonArray.toString(2));
-                } else if (jsonString.charAt(0) == '{') {
-                    JSONObject jsonObject = new JSONObject(jsonString);
-                    System.out.println(jsonObject.toString(2));
-                } else {
-                    System.out.println(jsonString);
-                }
-            }
-        } catch (Exception e) {
-            // Display error message.
-            System.out.println(e.getMessage());
+        String jsonString = face.findSimilar(faceId, faceIds.toArray(new String[faceIds.size()]));
+        if (jsonString.charAt(0) == '[') {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            System.out.println(jsonArray.toString(2));
+        } else if (jsonString.charAt(0) == '{') {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            System.out.println(jsonObject.toString(2));
+        } else {
+            System.out.println(jsonString);
         }
+
 
     }
 }
